@@ -187,6 +187,18 @@
 
     let finalJsonData = null;
 
+    async function fetchJson(url) {
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            credentials: 'omit'
+        });
+        if (!response.ok) {
+            throw new Error(`Fetch failed: ${response.status} ${response.statusText}`);
+        }
+        return await response.json();
+    }
+
     async function fetchLeaderboard() {
         const leaderboardList = document.getElementById('leaderboardList');
         leaderboardList.innerHTML = "";
@@ -197,21 +209,8 @@
 
         while (hasMore) {
             const url = `${FORGEJO_URL}/api/v1/repos/${OWNER}/${REPO}/issues?state=all&page=${page}&limit=50`;
-            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-
             try {
-                const response = await fetch(proxyUrl, {
-                    method: 'GET',
-                    mode: 'cors',
-                    credentials: 'omit'
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text().catch(() => 'Geen details beschikbaar');
-                    throw new Error(`${response.status} ${response.statusText}: ${errorText}`);
-                }
-
-                const issues = await response.json();
+                const issues = await fetchJson(url);
 
                 if (!issues || issues.length === 0) {
                     hasMore = false;
@@ -234,18 +233,12 @@
                             } else {
                                 const reactionsUrl = `${FORGEJO_URL}/api/v1/repos/${OWNER}/${REPO}/issues/${issue.number}/reactions`;
                                 console.log(`Probeer reactions op te halen voor issue ${issue.number}: ${reactionsUrl}`);
-                                const proxyReactionsUrl = `https://corsproxy.io/?${encodeURIComponent(reactionsUrl)}`;
-                                const reactionsResponse = await fetch(proxyReactionsUrl, {
-                                    method: 'GET',
-                                    mode: 'cors',
-                                    credentials: 'omit'
-                                });
-                                if (reactionsResponse.ok) {
-                                    const reactions = await reactionsResponse.json();
+                                try {
+                                    const reactions = await fetchJson(reactionsUrl);
                                     console.log(`Reactions voor issue ${issue.number}:`, reactions);
                                     likes = reactions.filter(r => r.content === "+1" || r.content === "thumbs_up").length;
-                                } else {
-                                    console.log(`Reactions endpoint returnerde ${reactionsResponse.status} voor issue ${issue.number}`);
+                                } catch (e) {
+                                    console.log(`Reactions endpoint niet bereikbaar voor issue ${issue.number}:`, e.message);
                                 }
                             }
                         } catch (e) {
