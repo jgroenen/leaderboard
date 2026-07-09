@@ -3,222 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forgejo Issue Leaderboard</title>
+    <title>Codeplatform Issue Leaderboard</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
-            --bg-color: #f4f6f9;
-            --card-bg: #ffffff;
-            --text-color: #333333;
-            --primary-color: #4481eb;
-            --border-color: #e1e4e8;
+            --color-primary: #42145f;
+            --color-accent: #f092cd;
+            --color-open-pink: #f092cd;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: Arial, Helvetica, sans-serif;
+            background: #fff;
+            color: #333;
             line-height: 1.6;
-            margin: 0;
-            padding: 20px;
+            padding: 0;
+            min-height: 100vh;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 0 20px;
         }
 
-        h1, h2 {
-            color: #2c3e50;
+        header {
+            background: var(--color-open-pink);
+            color: var(--color-primary);
+            padding: 20px 0;
+            margin-bottom: 30px;
         }
 
-        .config-panel {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
+        header .content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
 
-        .form-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
+        header img.logo {
+            height: 44px;
         }
 
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 100;
+            margin: 0;
+            color: var(--color-primary);
         }
 
-        input {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 0.95rem;
-        }
-
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
+        header .subtitle {
             font-size: 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-
-        button:hover {
-            background-color: #316cd1;
-        }
-
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-
-        .status {
-            margin-top: 10px;
-            font-weight: bold;
-            color: #666;
+            opacity: 0.85;
+            margin-top: 5px;
+            color: var(--color-primary);
         }
 
         .leaderboard-item {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            border-left: 5px solid var(--primary-color);
+            position: relative;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             margin-bottom: 15px;
-            display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            gap: 20px;
+            border: 1px solid #e0e0e0;
+            transition: box-shadow 0.2s, transform 0.2s;
+            width: 100%;
+            background: #F9F9F9;
         }
 
         .issue-details {
-            max-width: 80%;
+            flex: 1;
+            min-width: 0;
         }
 
         .issue-title {
-            margin: 0 0 8px 0;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+            font-weight: 100;
+            color: var(--color-primary);
+            padding: 10px;
         }
 
         .issue-title a {
-            color: var(--primary-color);
+            color: var(--color-primary);
             text-decoration: none;
         }
 
         .issue-title a:hover {
             text-decoration: underline;
+            color: #3d1a6e;
         }
 
         .issue-desc {
-            font-size: 0.9rem;
-            color: #666;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.6;
+            padding: 0 10px 10px;
+        }
+
+        .issue-number {
+            background: #f5f5f5;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            color: var(--color-primary);
         }
 
         .likes-badge {
-            background-color: #e6f4ea;
-            color: #137333;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 1.1rem;
+            background-color: #EEE;
+            color: #155724;
+            padding: 8px 16px;
+            font-size: 1rem;
             display: flex;
             align-items: center;
-            gap: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            gap: 6px;
+            width: 80px;
+            position: absolute;
+            top: 0;
+            right: 0;
         }
 
-        .actions {
-            margin-bottom: 15px;
-            display: flex;
-            gap: 10px;
+        .likes-badge .thumbs-up {
+            font-size: 1.1rem;
         }
 
-        .btn-secondary {
-            background-color: #6c757d;
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
         }
-        .btn-secondary:hover {
-            background-color: #5a6268;
+
+        .empty-state h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--color-primary);
+        }
+
+        @media (max-width: 768px) {
+            .leaderboard-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .likes-badge {
+                align-self: flex-end;
+            }
+
+            header .content {
+                flex-direction: column;
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🚀 Forgejo Issue Leaderboard</h1>
-    
-    <div class="config-panel">
-        <div class="form-group">
-            <div>
-                <label for="forgejoUrl">Forgejo URL</label>
-                <input type="url" id="forgejoUrl" value="https://code.overheid.nl" placeholder="https://codeberg.org">
-            </div>
-            <div>
-                <label for="owner">Owner / Gebruiker</label>
-                <input type="text" id="owner" value="MinBZK" placeholder="bijv. forgejo">
-            </div>
-            <div>
-                <label for="repo">Repository</label>
-                <input type="text" id="repo" value="Codeplatform" placeholder="bijv. forgejo">
-            </div>
-            <div>
-                <label for="token">API Token (Optioneel)</label>
-                <input type="password" id="token" placeholder="Laat leeg voor publieke repos">
-            </div>
+<header>
+    <div class="content">
+        <img src="https://code.overheid.nl/assets/img/logo-codeoverheid.png" alt="Code.overheid.nl logo" class="logo">
+        <div>
+            <h1>Issue Leaderboard</h1>
         </div>
-        <p style="margin-top: 0; font-size: 0.85rem; color: #666;">
-            ⚠️ Open deze pagina vanaf een webserver (niet file://) om CORS-problemen te vermijden.
-        </p>
-        <button id="fetchBtn" onclick="generateLeaderboard()">Haal Leaderboard Op</button>
-        <div id="status" class="status"></div>
     </div>
+</header>
 
-    <div id="resultsSection" style="display: none;">
-        <h2>Resultaten</h2>
-        <div class="actions">
-            <button class="btn-secondary" onclick="copyJson()">Kopieer JSON naar klembord</button>
-        </div>
-        <div id="leaderboardList"></div>
-    </div>
+<div class="container">
+    <div id="leaderboardList"></div>
 </div>
 
 <script>
+    const FORGEJO_URL = "https://code.overheid.nl";
+    const OWNER = "MinBZK";
+    const REPO = "Codeplatform";
+    const TOKEN = "";
+
     let finalJsonData = null;
 
-    async function generateLeaderboard() {
-        const forgejoUrl = document.getElementById('forgejoUrl').value.trim();
-        const owner = document.getElementById('owner').value.trim();
-        const repo = document.getElementById('repo').value.trim();
-        const token = document.getElementById('token').value.trim();
-        
-        const statusDiv = document.getElementById('status');
-        const fetchBtn = document.getElementById('fetchBtn');
+    async function fetchLeaderboard() {
         const leaderboardList = document.getElementById('leaderboardList');
-        const resultsSection = document.getElementById('resultsSection');
-
-        if (!forgejoUrl || !owner || !repo) {
-            statusDiv.innerHTML = "❌ Vul alstublieft de URL, Owner en Repository in.";
-            return;
-        }
-
-        // Reset UI
-        statusDiv.innerHTML = "⏳ Data ophalen... Pagina 1";
         leaderboardList.innerHTML = "";
-        resultsSection.style.display = "none";
-        fetchBtn.disabled = true;
 
         let leaderboardData = [];
         let page = 1;
@@ -226,21 +197,20 @@
 
         const headers = {
             "Accept": "application/json",
-            ...(token && { "Authorization": `token ${token}` })
+            ...(TOKEN && { "Authorization": `token ${TOKEN}` })
         };
 
         while (hasMore) {
-            statusDiv.innerHTML = `⏳ Data ophalen... Pagina ${page}`;
-            const url = `${forgejoUrl}/api/v1/repos/${owner}/${repo}/issues?state=all&page=${page}&limit=50`;
-            
+            const url = `${FORGEJO_URL}/api/v1/repos/${OWNER}/${REPO}/issues?state=all&page=${page}&limit=50`;
+
             try {
-                const response = await fetch(url, { 
+                const response = await fetch(url, {
                     method: 'GET',
                     mode: 'cors',
                     credentials: 'omit',
-                    headers 
+                    headers
                 });
-                
+
                 if (!response.ok) {
                     const errorText = await response.text().catch(() => 'Geen details beschikbaar');
                     throw new Error(`${response.status} ${response.statusText}: ${errorText}`);
@@ -253,30 +223,23 @@
                     break;
                 }
 
-                // Haal reactions op voor alle issues in deze pagina (parallel)
-                statusDiv.innerHTML = `⏳ Data ophalen... Pagina ${page} (reactions checken...)`;
-                
                 const issuesWithReactions = await Promise.all(
                     issues.map(async (issue) => {
-                        if (issue.pull_request) return null; // Sla PR's over
-                        
+                        if (issue.pull_request) return null;
+
                         let likes = 0;
                         try {
-                            // Probeer eerst of reactions al in de issue zitten
                             if (issue.reactions) {
                                 console.log(`Issue ${issue.number} heeft reactions in issue object:`, issue.reactions);
                                 if (typeof issue.reactions === 'object') {
-                                    // Check voor +1 en thumbs_up (Forgejo/Gitea gebruikt thumbs_up)
                                     likes = (issue.reactions['+1'] || 0) + (issue.reactions['thumbs_up'] || 0);
                                 } else if (Array.isArray(issue.reactions)) {
-                                    // Tel alle +1 en thumbs_up reactions
                                     likes = issue.reactions.filter(r => r.content === "+1" || r.content === "thumbs_up").length;
                                 }
                             } else {
-                                // Haal reactions op via aparte API call
-                                const reactionsUrl = `${forgejoUrl}/api/v1/repos/${owner}/${repo}/issues/${issue.number}/reactions`;
+                                const reactionsUrl = `${FORGEJO_URL}/api/v1/repos/${OWNER}/${REPO}/issues/${issue.number}/reactions`;
                                 console.log(`Probeer reactions op te halen voor issue ${issue.number}: ${reactionsUrl}`);
-                                const reactionsResponse = await fetch(reactionsUrl, { 
+                                const reactionsResponse = await fetch(reactionsUrl, {
                                     method: 'GET',
                                     mode: 'cors',
                                     credentials: 'omit',
@@ -285,17 +248,15 @@
                                 if (reactionsResponse.ok) {
                                     const reactions = await reactionsResponse.json();
                                     console.log(`Reactions voor issue ${issue.number}:`, reactions);
-                                    // Tel alle +1 en thumbs_up reactions
                                     likes = reactions.filter(r => r.content === "+1" || r.content === "thumbs_up").length;
                                 } else {
                                     console.log(`Reactions endpoint returnerde ${reactionsResponse.status} voor issue ${issue.number}`);
                                 }
                             }
                         } catch (e) {
-                            // Reactions endpoint bestaat niet of is niet bereikbaar
                             console.log(`Reactions endpoint niet beschikbaar voor issue ${issue.number}:`, e.message);
                         }
-                        
+
                         console.log(`Issue ${issue.number} (${issue.title}): ${likes} likes`);
                         return {
                             issue: issue.html_url,
@@ -306,53 +267,47 @@
                         };
                     })
                 );
-                
-                // Filter nulls (PR's) en voeg toe aan leaderboard
-                leaderboardData.push(...issuesWithReactions.filter(Boolean));
 
+                leaderboardData.push(...issuesWithReactions.filter(Boolean));
                 page++;
             } catch (error) {
-                let errorMsg = error.message;
-                if (errorMsg.includes('CORS') || errorMsg.includes('origin') || errorMsg.includes('Access-Control')) {
-                    errorMsg = 'CORS-fout: Open deze pagina vanaf een webserver (bijv. via een lokale server) in plaats van vanuit een file:// URL';
-                }
-                statusDiv.innerHTML = `❌ Fout opgetreden: ${errorMsg}`;
-                fetchBtn.disabled = false;
-                return;
+                console.error('Fout:', error.message);
+                throw error;
             }
         }
 
-        // Sorteren op meeste likes
         leaderboardData.sort((a, b) => b.likes - a.likes);
         console.log('Gesorteerde leaderboard:', leaderboardData);
-
-        // JSON opslaan voor de kopieer-knop
         finalJsonData = { leaderboard: leaderboardData };
 
-        // Renderen in de UI
         if (leaderboardData.length === 0) {
-            leaderboardList.innerHTML = "<p>Geen issues gevonden in deze repository.</p>";
+            leaderboardList.innerHTML = '<div class="empty-state"><h3>Geen issues gevonden</h3><p>Er zijn momenteel geen issues in deze repository.</p></div>';
         } else {
             leaderboardData.forEach(item => {
                 const itemEl = document.createElement('div');
                 itemEl.className = 'leaderboard-item';
+                const desc = item.description ? escapeHtml(item.description.substring(0, 200)) : '<i>Geen omschrijving</i>';
                 itemEl.innerHTML = `
                     <div class="issue-details">
-                        <h3 class="issue-title"><a href="${item.issue}" target="_blank">${escapeHtml(item.title)}</a></h3>
-                        <div class="issue-desc" title="${escapeHtml(item.description)}">${escapeHtml(item.description) || '<i>Geen omschrijving</i>'}</div>
+                        <h3 class="issue-title">
+                            <a href="${item.issue}" target="_blank">${escapeHtml(item.title)}</a>
+                            <span class="issue-number">#${item.number}</span>
+                        </h3>
+                        <div class="issue-desc" title="${escapeHtml(item.description)}">${desc}</div>
+                        
                     </div>
-                    <div class="likes-badge">👍 ${item.likes}</div>
+                    <div class="likes-badge">
+                        <span class="thumbs-up">👍</span>
+                        <span>${item.likes}</span>
+                    </div>
                 `;
                 leaderboardList.appendChild(itemEl);
             });
         }
 
-        statusDiv.innerHTML = "✅ Leaderboard succesvol gegenereerd!";
-        resultsSection.style.display = "block";
-        fetchBtn.disabled = false;
+
     }
 
-    // Hulpfunctie tegen XSS bij het tonen van onbekende input
     function escapeHtml(text) {
         if (!text) return "";
         return text
@@ -363,13 +318,14 @@
             .replace(/'/g, "&#039;");
     }
 
-    // Functie om de JSON naar klembord te kopiëren
-    function copyJson() {
-        if (!finalJsonData) return;
-        navigator.clipboard.writeText(JSON.stringify(finalJsonData, null, 2))
-            .then(() => alert("JSON gekopieerd naar klembord!"))
-            .catch(err => alert("Fout bij kopiëren: " + err));
+    function loadAndRefresh() {
+        fetchLeaderboard().catch(() => {});
+        setInterval(() => {
+            fetchLeaderboard().catch(() => {});
+        }, 15000);
     }
+
+    window.addEventListener('load', loadAndRefresh);
 </script>
 
 </body>
