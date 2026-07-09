@@ -265,11 +265,12 @@
                             // Probeer eerst of reactions al in de issue zitten
                             if (issue.reactions) {
                                 console.log(`Issue ${issue.number} heeft reactions in issue object:`, issue.reactions);
-                                if (typeof issue.reactions === 'object' && issue.reactions['+1'] !== undefined) {
-                                    likes = issue.reactions['+1'] || 0;
+                                if (typeof issue.reactions === 'object') {
+                                    // Check voor +1 en thumbs_up (Forgejo/Gitea gebruikt thumbs_up)
+                                    likes = (issue.reactions['+1'] || 0) + (issue.reactions['thumbs_up'] || 0);
                                 } else if (Array.isArray(issue.reactions)) {
-                                    const plusOne = issue.reactions.find(r => r.content === "+1");
-                                    if (plusOne) likes = plusOne.count || 0;
+                                    // Tel alle +1 en thumbs_up reactions
+                                    likes = issue.reactions.filter(r => r.content === "+1" || r.content === "thumbs_up").length;
                                 }
                             } else {
                                 // Haal reactions op via aparte API call
@@ -284,8 +285,8 @@
                                 if (reactionsResponse.ok) {
                                     const reactions = await reactionsResponse.json();
                                     console.log(`Reactions voor issue ${issue.number}:`, reactions);
-                                    const plusOne = reactions.find(r => r.content === "+1");
-                                    if (plusOne) likes = plusOne.count || 0;
+                                    // Tel alle +1 en thumbs_up reactions
+                                    likes = reactions.filter(r => r.content === "+1" || r.content === "thumbs_up").length;
                                 } else {
                                     console.log(`Reactions endpoint returnerde ${reactionsResponse.status} voor issue ${issue.number}`);
                                 }
