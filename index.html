@@ -195,20 +195,15 @@
         let page = 1;
         let hasMore = true;
 
-        const headers = {
-            "Accept": "application/json",
-            ...(TOKEN && { "Authorization": `token ${TOKEN}` })
-        };
-
         while (hasMore) {
             const url = `${FORGEJO_URL}/api/v1/repos/${OWNER}/${REPO}/issues?state=all&page=${page}&limit=50`;
+            const proxyUrl = `https://allorigins.win/get?url=${encodeURIComponent(url)}`;
 
             try {
-                const response = await fetch(url, {
+                const response = await fetch(proxyUrl, {
                     method: 'GET',
                     mode: 'cors',
-                    credentials: 'omit',
-                    headers
+                    credentials: 'omit'
                 });
 
                 if (!response.ok) {
@@ -216,7 +211,8 @@
                     throw new Error(`${response.status} ${response.statusText}: ${errorText}`);
                 }
 
-                const issues = await response.json();
+                const proxyData = await response.json();
+                const issues = JSON.parse(proxyData.contents);
 
                 if (!issues || issues.length === 0) {
                     hasMore = false;
@@ -239,14 +235,15 @@
                             } else {
                                 const reactionsUrl = `${FORGEJO_URL}/api/v1/repos/${OWNER}/${REPO}/issues/${issue.number}/reactions`;
                                 console.log(`Probeer reactions op te halen voor issue ${issue.number}: ${reactionsUrl}`);
-                                const reactionsResponse = await fetch(reactionsUrl, {
+                                const proxyReactionsUrl = `https://allorigins.win/get?url=${encodeURIComponent(reactionsUrl)}`;
+                                const reactionsResponse = await fetch(proxyReactionsUrl, {
                                     method: 'GET',
                                     mode: 'cors',
-                                    credentials: 'omit',
-                                    headers
+                                    credentials: 'omit'
                                 });
                                 if (reactionsResponse.ok) {
-                                    const reactions = await reactionsResponse.json();
+                                    const proxyData = await reactionsResponse.json();
+                                    const reactions = JSON.parse(proxyData.contents);
                                     console.log(`Reactions voor issue ${issue.number}:`, reactions);
                                     likes = reactions.filter(r => r.content === "+1" || r.content === "thumbs_up").length;
                                 } else {
