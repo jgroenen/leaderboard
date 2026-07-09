@@ -254,6 +254,8 @@
                 }
 
                 // Haal reactions op voor alle issues in deze pagina (parallel)
+                statusDiv.innerHTML = `⏳ Data ophalen... Pagina ${page} (reactions checken...)`;
+                
                 const issuesWithReactions = await Promise.all(
                     issues.map(async (issue) => {
                         if (issue.pull_request) return null; // Sla PR's over
@@ -282,9 +284,11 @@
                                     const plusOne = reactions.find(r => r.content === "+1");
                                     if (plusOne) likes = plusOne.count || 0;
                                 }
+                                // 404 of andere errors: blijf op 0 likes
                             }
                         } catch (e) {
-                            console.log(`Geen reactions gevonden voor issue ${issue.number}:`, e.message);
+                            // Reactions endpoint bestaat niet of is niet bereikbaar
+                            console.log(`Reactions endpoint niet beschikbaar voor issue ${issue.number}, gebruik 0 likes`);
                         }
                         
                         return {
