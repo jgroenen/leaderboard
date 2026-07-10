@@ -180,10 +180,7 @@
 </div>
 
 <script>
-    const FORGEJO_URL = "https://code.overheid.nl";
-    const OWNER = "MinBZK";
-    const REPO = "Codeplatform";
-    const TOKEN = "";
+    const PROXY_URL = "https://proxy.apitecture.io/?q=issues";
 
     let finalJsonData = null;
 
@@ -204,47 +201,24 @@
         leaderboardList.innerHTML = "";
 
         let leaderboardData = [];
-        let page = 1;
-        let hasMore = true;
 
-        while (hasMore) {
-            const url = `${FORGEJO_URL}/api/v1/repos/${OWNER}/${REPO}/issues?state=all&page=${page}&limit=50`;
-            try {
-                const issues = await fetchJson(url);
+        try {
+            const issues = await fetchJson(PROXY_URL);
 
-                if (!issues || issues.length === 0) {
-                    hasMore = false;
-                    break;
-                }
-
-                const issuesWithReactions = await Promise.all(
-                    issues.map(async (issue) => {
-                        if (issue.pull_request) return null;
-
+            if (!issues || issues.length === 0) {
+                console.log('Geen issues gevonden');
+            } else {
+                leaderboardData = issues
+                    .filter(issue => !issue.pull_request)
+                    .map(issue => {
                         let likes = 0;
-                        try {
-                            if (issue.reactions) {
-                                console.log(`Issue ${issue.number} heeft reactions in issue object:`, issue.reactions);
-                                if (typeof issue.reactions === 'object') {
-                                    likes = (issue.reactions['+1'] || 0) + (issue.reactions['thumbs_up'] || 0);
-                                } else if (Array.isArray(issue.reactions)) {
-                                    likes = issue.reactions.filter(r => r.content === "+1" || r.content === "thumbs_up").length;
-                                }
-                            } else {
-                                const reactionsUrl = `${FORGEJO_URL}/api/v1/repos/${OWNER}/${REPO}/issues/${issue.number}/reactions`;
-                                console.log(`Probeer reactions op te halen voor issue ${issue.number}: ${reactionsUrl}`);
-                                try {
-                                    const reactions = await fetchJson(reactionsUrl);
-                                    console.log(`Reactions voor issue ${issue.number}:`, reactions);
-                                    likes = reactions.filter(r => r.content === "+1" || r.content === "thumbs_up").length;
-                                } catch (e) {
-                                    console.log(`Reactions endpoint niet bereikbaar voor issue ${issue.number}:`, e.message);
-                                }
+                        if (issue.reactions) {
+                            if (typeof issue.reactions === 'object' && !Array.isArray(issue.reactions)) {
+                                likes = (issue.reactions['+1'] || 0) + (issue.reactions['thumbs_up'] || 0) + (issue.reactions['heart'] || 0);
+                            } else if (Array.isArray(issue.reactions)) {
+                                likes = issue.reactions.filter(r => r.content === "+1" || r.content === "thumbs_up" || r.content === "heart").length;
                             }
-                        } catch (e) {
-                            console.log(`Reactions endpoint niet beschikbaar voor issue ${issue.number}:`, e.message);
                         }
-
                         console.log(`Issue ${issue.number} (${issue.title}): ${likes} likes`);
                         return {
                             issue: issue.html_url,
@@ -253,15 +227,11 @@
                             likes: likes,
                             number: issue.number
                         };
-                    })
-                );
-
-                leaderboardData.push(...issuesWithReactions.filter(Boolean));
-                page++;
-            } catch (error) {
-                console.error('Fout:', error.message);
-                throw error;
+                    });
             }
+        } catch (error) {
+            console.error('Fout bij ophalen issues:', error.message);
+            throw error;
         }
 
         leaderboardData.sort((a, b) => b.likes - a.likes);
